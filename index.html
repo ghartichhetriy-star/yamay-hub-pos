@@ -1,1 +1,38 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yamay Hub POS</title>
+<style>
+body{margin:0;background:#111;color:white;font-family:Arial;padding:16px}
+header{background:#222;padding:18px;border-radius:14px;border-bottom:3px solid #f4d21f}
+h1{color:#f4d21f;margin:0}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:16px 0}
+button{padding:15px;border:0;border-radius:10px;font-size:16px;cursor:pointer}
+.table,.food{background:#292929;color:white;border:1px solid #444}
+.food{display:flex;flex-direction:column;gap:10px;align-items:center}
+.price{color:#f4d21f;font-weight:bold}
+.yellow{background:#f4d21f;color:#111;font-weight:bold}
+.panel{background:#222;border-radius:12px;padding:14px;margin-top:15px}
+#order{display:none}
+select{padding:12px;width:100%;margin:8px 0;border-radius:8px}
+</style>
+</head>
+<body>
+<header><h1>Yamay Hub POS</h1><p>GOOD FOOD · GREAT VIBES</p></header>
+<section id="home"><h2>Select Table</h2><div class="grid" id="tables"></div><button class="yellow" onclick="openOrder('Takeaway')">Takeaway Order</button></section>
+<section id="order"><button class="table" onclick="back()">← Back</button><h2 id="heading"></h2><label>Order type</label><select id="kind"><option>Dine-in</option><option>Takeaway</option></select><h3>Food & Drinks</h3><div class="grid" id="foods"></div><div class="panel"><h3>Bill</h3><div id="bill">No items selected</div><h2 id="total">Total: रु. 0</h2><label>Payment</label><select id="pay"><option>Cash</option><option>Card</option></select><button class="yellow" onclick="checkout()">Checkout / Print Bill</button></div></section>
+<script>
+const menu=[['Momo',180,'🥟'],['Chowmein',220,'🍜'],['Burger',250,'🍔'],['Popcorn Chicken',200,'🍗'],['Lemon Tea',80,'🍋'],['Cold Drink',100,'🥤']];
+let cart={},table='A1';
+function init(){document.getElementById('tables').innerHTML=Array.from({length:12},(_,i)=>'<button class="table" onclick="openOrder(\'A'+(i+1)+'\')">Table A'+(i+1)+'</button>').join('')}
+function openOrder(t){table=t;cart={};document.getElementById('home').style.display='none';document.getElementById('order').style.display='block';document.getElementById('heading').textContent=t==='Takeaway'?'Takeaway Order':'Table '+t;document.getElementById('kind').value=t==='Takeaway'?'Takeaway':'Dine-in';draw()}
+function back(){document.getElementById('home').style.display='block';document.getElementById('order').style.display='none'}
+function draw(){document.getElementById('foods').innerHTML=menu.map((p,i)=>'<div class="food"><span style="font-size:28px">'+p[2]+'</span><b>'+p[0]+'</b><span class="price">रु. '+p[1]+'</span><div><button onclick="change('+i+',-1)">−</button> '+(cart[i]||0)+' <button onclick="change('+i+',1)">+</button></div></div>').join('');let total=0,html='';menu.forEach((p,i)=>{if(cart[i]){html+='<p>'+p[0]+' × '+cart[i]+' = रु. '+p[1]*cart[i]+'</p>';total+=p[1]*cart[i]}});document.getElementById('bill').innerHTML=html||'No items selected';document.getElementById('total').textContent='Total: रु. '+total}
+function change(i,n){cart[i]=Math.max(0,(cart[i]||0)+n);draw()}
+function checkout(){let total=menu.reduce((s,p,i)=>s+p[1]*(cart[i]||0),0);if(!total){alert('पहिले खाना छान्नुहोस्');return}let receipt='YAMAY HUB POS\n'+table+'\n'+menu.map((p,i)=>cart[i]?p[0]+' x '+cart[i]+' = रु. '+p[1]*cart[i]:'').filter(Boolean).join('\n')+'\nTotal: रु. '+total+'\nPayment: '+document.getElementById('pay').value;let w=window.open('','_blank');if(w){w.document.write('<pre>'+receipt+'</pre>');w.document.close();w.print()}else alert(receipt)}
+init();
+</script>
+</body>
+</html>
