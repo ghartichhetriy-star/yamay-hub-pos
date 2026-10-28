@@ -1,255 +1,125 @@
+from pathlib import Path
 
-<!DOCTYPE html>
-<html lang="ne">
+html = r'''<!doctype html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Yamay Hub POS</title>
 <style>
-:root{--bg:#f3f5f8;--card:#fff;--fg:#172033;--accent:#087f5b;--line:#dce2ea}
-body.dark{--bg:#151922;--card:#222936;--fg:#f4f6fa;--line:#3b4555}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px Arial,sans-serif}
-header{background:#087f5b;color:white;padding:16px;display:flex;justify-content:space-between;align-items:center;gap:8px}
-h1{font-size:21px;margin:0} h2{font-size:17px}
-main{padding:12px;max-width:1100px;margin:auto}
-nav,.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-button,select,input{padding:11px;border-radius:8px;border:1px solid var(--line);font-size:14px}
-button{cursor:pointer;background:var(--accent);color:white;border:0}
-button.secondary{background:#64748b}
-button.danger{background:#b42318}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px;margin:10px 0}
-.layout{display:grid;grid-template-columns:1fr;gap:10px}
-@media(min-width:750px){.layout{grid-template-columns:1.1fr .9fr}}
-.tables,.menu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.tables button{background:#64748b;min-height:55px}
-.tables button.selected{background:#087f5b;outline:3px solid #91e4c4}
-.menu button{background:var(--card);color:var(--fg);border:1px solid var(--line);text-align:left;min-height:65px}
-.small{font-size:12px;opacity:.8}
-.item{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding:10px 0}
-.item button{padding:7px 11px}
-.total{font-size:23px;font-weight:bold}
-input,select{background:var(--card);color:var(--fg);max-width:100%}
-.hidden{display:none!important}
-footer{text-align:center;padding:20px;font-size:12px;opacity:.7}
+:root{--yellow:#ffc900;--yellow2:#ffe36b;--ink:#202124;--muted:#68707b;--line:#e7e8eb;--bg:#f7f7f5;--white:#fff;--green:#21834a;--red:#c83d32}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}button,input,select{font:inherit}button{border:0;border-radius:10px;padding:11px 14px;background:var(--yellow);color:#171717;font-weight:700;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#fff;border:1px solid var(--line)}.danger{background:#fff0ee;color:var(--red);border:1px solid #ffd2cc}.appbar{background:var(--yellow);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;position:sticky;top:0;z-index:5}.brand{display:flex;align-items:center;gap:10px}.logo{width:42px;height:42px;border-radius:13px;background:#fff;display:grid;place-items:center;font-size:25px}.brand h1{font-size:18px;margin:0}.brand small{display:block;font-size:11px;letter-spacing:1.5px}.wrap{max-width:1200px;margin:auto;padding:14px}.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:0 2px 8px #00000006}.title{font-size:18px;margin:0 0 12px}.muted{color:var(--muted);font-size:13px}.hidden{display:none!important}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{max-width:100%}input,select{background:white;border:1px solid var(--line);border-radius:10px;padding:12px;min-width:0}input:focus,select:focus{outline:2px solid #ffdf4d}.full{width:100%}.login-shell{min-height:100dvh;display:grid;place-items:center;padding:18px;background:linear-gradient(135deg,#fff 0 55%,#fff4bf 55%)}.login{width:min(420px,100%);padding:25px}.login .logo{width:74px;height:74px;font-size:42px;margin:0 auto 8px;border:2px solid var(--yellow)}.center{text-align:center}.login input,.login select{width:100%;margin:6px 0}.login button{width:100%;margin-top:8px}.tabs{display:flex;gap:8px;overflow:auto;padding:2px 0 12px}.tabs button{white-space:nowrap}.tabs .active{background:#222;color:#fff}.table-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.table-btn{background:#fff;border:1px solid var(--line);padding:13px 5px;min-height:84px}.table-btn strong{display:block;font-size:19px}.table-btn small{display:block;margin-top:5px;color:var(--green)}.table-btn.busy small{color:#c65b1a}.table-btn.active{outline:3px solid var(--yellow);border-color:#e0b200}.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.menu-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.product{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff;display:flex;flex-direction:column}.product img{width:100%;height:112px;object-fit:cover;background:#fff3bd}.product .pbody{padding:10px;display:flex;flex-direction:column;gap:6px;flex:1}.product .pname{font-weight:750}.product .price{color:#555;font-size:14px}.product button{padding:9px}.orderline{display:grid;grid-template-columns:1fr auto;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}.qty{display:flex;gap:7px;align-items:center}.qty button{padding:5px 10px}.totals{display:grid;gap:9px;margin-top:12px}.totalrow{display:flex;justify-content:space-between;gap:8px}.grand{font-size:23px;font-weight:850;border-top:1px solid var(--line);padding-top:12px}.pill{display:inline-block;padding:4px 8px;border-radius:30px;background:#fff4bf;font-size:12px;font-weight:700}.layout{display:grid;grid-template-columns:1fr;gap:12px}.bottomnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.bottomnav button{flex:1}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.stat{background:#fff9dc;border-radius:12px;padding:12px}.stat strong{display:block;font-size:20px;margin-top:4px}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}th{background:#fff7d3}.notice{padding:10px 12px;border-radius:10px;background:#fff7d3;font-size:13px}.foot{text-align:center;color:var(--muted);font-size:12px;padding:18px}
+@media(min-width:780px){.layout{grid-template-columns:1.1fr .9fr}.table-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.menu-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.product img{height:130px}.stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
 </head>
 <body>
-<header>
-  <div><h1>🍽️ Yamay Hub POS</h1><div class="small">Cafe Billing System</div></div>
-  <div class="row">
-    <button class="secondary" onclick="toggleTheme()">☼</button>
-    <button class="secondary" onclick="toggleLang()" id="langBtn">नेपाली</button>
+<div id="loginScreen" class="login-shell">
+  <div class="card login">
+    <div class="center"><div class="logo">☕</div><h1 style="margin:5px 0 0;font-size:30px"><span style="color:#d5a900">Yamay</span> Hub</h1><div class="muted" style="letter-spacing:2px">GOOD FOOD · GREAT VIBES</div><p class="muted">Login to continue</p></div>
+    <form id="loginForm">
+      <input id="username" placeholder="Username" autocomplete="username" required>
+      <input id="password" type="password" placeholder="Password / PIN" autocomplete="current-password" required>
+      <select id="role"><option value="employee">Employee</option><option value="admin">Admin</option></select>
+      <button type="submit" class="full">LOGIN</button>
+    </form>
+    <p class="muted center">Demo login: admin / 1234 · employee / 1111</p>
+    <p class="muted center">Prototype only — login is not secure for real business use.</p>
   </div>
-</header>
-<main>
-  <nav>
-    <button onclick="showPage('pos')">POS / Billing</button>
-    <button onclick="showPage('reports')">Sales Report</button>
-    <button onclick="admin()">Admin</button>
-    <button class="secondary" onclick="backup()">Backup</button>
-    <button class="secondary" onclick="document.getElementById('restoreFile').click()">Restore</button>
-    <input id="restoreFile" type="file" accept=".json" class="hidden" onchange="restore(event)">
-  </nav>
-
-  <section id="pos">
-    <div class="layout">
-      <div>
-        <div class="card">
-          <h2>१. टेबल छान्नुहोस्</h2>
-          <div class="tables" id="tables"></div>
-          <p class="small">Takeaway छान्दा टेबल आवश्यक पर्दैन।</p>
-          <div class="row">
-            <button class="secondary" onclick="setMode('dine')">Dine-in</button>
-            <button class="secondary" onclick="setMode('takeaway')">Takeaway</button>
-            <span id="modeLabel">Dine-in</span>
-          </div>
-        </div>
-        <div class="card">
-          <h2>२. Menu</h2>
-          <div class="row">
-            <input id="search" placeholder="खाना खोज्नुहोस्..." oninput="renderMenu()">
-            <select id="category" onchange="renderMenu()">
-              <option value="All">सबै / All</option>
-              <option>Food</option><option>Drinks</option>
-            </select>
-          </div>
-          <div class="menu" id="menu"></div>
-        </div>
-      </div>
+</div>
+<div id="app" class="hidden">
+  <header class="appbar">
+    <div class="brand"><div class="logo">☕</div><div><h1>Yamay Hub POS</h1><small>GOOD FOOD · GREAT VIBES</small></div></div>
+    <div class="row"><span id="who" class="pill">Employee</span><button class="secondary" onclick="logout()">Logout</button></div>
+  </header>
+  <main class="wrap">
+    <div class="bottomnav">
+      <button id="navTables" onclick="showView('tables')">Tables</button>
+      <button onclick="showView('reports')">Daily Closing</button>
+      <button id="navProducts" class="secondary hidden" onclick="showView('products')">Manage Menu</button>
+      <button class="secondary" onclick="backupData()">Backup</button>
+    </div>
+    <section id="tablesView">
       <div class="card">
-        <h2>३. बिल / Order</h2>
-        <div id="orderTitle">Table A1</div>
-        <div id="cart"></div>
-        <div class="item"><span>Subtotal</span><b id="subtotal">Rs. 0</b></div>
-        <div class="item"><span>Tax (%)</span><input id="tax" type="number" min="0" max="100" value="0" style="width:85px" onchange="renderCart()"></div>
-        <div class="item"><span>Total</span><span class="total" id="total">Rs. 0</span></div>
-        <p>Payment method</p>
-        <select id="payment">
-          <option>Cash</option><option>Card</option>
-        </select>
-        <div class="row" style="margin-top:12px">
-          <button onclick="checkout()">Complete Sale</button>
-          <button class="danger" onclick="clearOrder()">Clear Order</button>
+        <div class="section-head"><h2 class="title">Select Table</h2><button onclick="startTakeaway()">🛍 Takeaway</button></div>
+        <p class="muted">Choose a table to start or continue an order.</p>
+        <div id="tables" class="table-grid"></div>
+      </div>
+    </section>
+    <section id="orderView" class="hidden">
+      <div class="card" style="margin-bottom:12px">
+        <div class="section-head"><div><button class="secondary" onclick="showView('tables')">← Tables</button> <span id="orderHeading" class="title" style="display:inline-block;margin-left:7px">Table A1</span></div><span id="orderStatus" class="pill">New order</span></div>
+        <div class="row" style="margin:8px 0 12px"><input id="searchMenu" placeholder="Search menu..." oninput="renderMenu()" style="flex:1"><select id="catFilter" onchange="renderMenu()"><option>All</option><option>Food</option><option>Drinks</option></select></div>
+      </div>
+      <div class="layout">
+        <div class="card"><h2 class="title">Menu</h2><div id="menu" class="menu-grid"></div></div>
+        <div class="card"><div class="section-head"><h2 class="title">Order Summary</h2><button class="secondary" onclick="clearOrder()">Clear</button></div><div id="cart"></div>
+          <div class="totals"><div class="totalrow"><span>Subtotal</span><b id="subtotal">Rs. 0</b></div><div class="totalrow"><label for="discount">Discount (Rs.)</label><input id="discount" type="number" min="0" value="0" style="width:95px;padding:7px" oninput="renderCart()"></div><div class="totalrow"><label for="tax">Tax (%)</label><input id="tax" type="number" min="0" max="100" value="0" style="width:95px;padding:7px" oninput="renderCart()"></div><div class="totalrow grand"><span>Total</span><span id="total">Rs. 0</span></div></div>
+          <p class="muted">Payment</p><select id="payment" class="full"><option>Cash</option><option>Card</option></select>
+          <div class="row" style="margin-top:12px"><button style="flex:1" onclick="checkout()">Checkout & Print</button><button class="secondary" onclick="holdOrder()">Hold</button></div>
+          <p id="checkoutMessage" class="muted"></p>
         </div>
-        <p class="small">Card विकल्पले मात्र payment charge गर्दैन। वास्तविक card terminal छुट्टै चाहिन्छ।</p>
       </div>
-    </div>
-  </section>
-
-  <section id="reports" class="hidden">
-    <div class="card">
-      <h2>Daily Sales Report</h2>
-      <p>आजको बिक्री: <b id="dailyTotal">Rs. 0</b></p>
-      <p>बिल संख्या: <b id="dailyCount">0</b></p>
-      <div id="salesList"></div>
-    </div>
-  </section>
-  <section id="adminPage" class="hidden">
-    <div class="card">
-      <h2>Admin — Product Management</h2>
-      <p class="small">यहाँका परिवर्तन यसै device को browser मा मात्र सुरक्षित हुन्छन्।</p>
-      <div class="row">
-        <input id="pname" placeholder="Product name">
-        <input id="pprice" type="number" min="0" placeholder="Price (Rs.)">
-        <select id="ptype"><option>Food</option><option>Drinks</option></select>
-        <button onclick="addProduct()">Add Product</button>
+    </section>
+    <section id="productsView" class="hidden">
+      <div class="card"><h2 class="title">Admin — Manage Menu</h2><p class="notice">Only Admin can change products. This prototype stores data on this device/browser only.</p>
+        <form id="productForm" class="row"><input id="productName" placeholder="Product name" required style="flex:2"><input id="productPrice" type="number" min="0" step=".01" placeholder="Price" required style="flex:1"><select id="productType"><option>Food</option><option>Drinks</option></select><input id="productPhoto" type="url" placeholder="Photo URL (optional)" style="flex:2"><button>Add item</button></form>
+        <div id="productAdminList"></div>
       </div>
-      <div id="productList"></div>
-      <button class="secondary" onclick="logoutAdmin()">Exit Admin</button>
-    </div>
-  </section>
-</main>
-<footer>Yamay Hub POS · Local prototype · Keep regular backups</footer>
+    </section>
+    <section id="reportsView" class="hidden">
+      <div class="card"><div class="section-head"><h2 class="title">Daily Sales Closing</h2><button class="secondary" onclick="exportSales()">Export CSV</button></div>
+        <div class="stats"><div class="stat">Today's Sales<strong id="statSales">Rs. 0</strong></div><div class="stat">Orders<strong id="statOrders">0</strong></div><div class="stat">Items Sold<strong id="statItems">0</strong></div><div class="stat">Cash / Card<strong id="statPayments">0 / 0</strong></div></div>
+        <h3>Items sold today</h3><div class="tablewrap"><table><thead><tr><th>Item</th><th>Qty</th><th>Sales</th></tr></thead><tbody id="itemSales"></tbody></table></div>
+        <h3>Transactions</h3><div class="tablewrap"><table><thead><tr><th>Bill</th><th>Time</th><th>Table/Type</th><th>Items</th><th>Total</th><th>Payment</th><th>Receipt</th></tr></thead><tbody id="transactions"></tbody></table></div>
+      </div>
+    </section>
+  </main>
+  <div class="foot">Yamay Hub POS · Local prototype. Export backups regularly.</div>
+</div>
 <script>
-const initialMenu=[
- {id:1,name:"Momo",price:150,type:"Food"},
- {id:2,name:"Chowmein",price:180,type:"Food"},
- {id:3,name:"Fried Rice",price:200,type:"Food"},
- {id:4,name:"Burger",price:220,type:"Food"},
- {id:5,name:"Tea",price:40,type:"Drinks"},
- {id:6,name:"Coffee",price:100,type:"Drinks"},
- {id:7,name:"Water",price:30,type:"Drinks"},
- {id:8,name:"Cold Drink",price:80,type:"Drinks"}
+const money=n=>'Rs. '+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const defaultProducts=[
+{id:1,name:'Chicken Momo',price:150,type:'Food',photo:'https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?auto=format&fit=crop&w=500&q=80'},
+{id:2,name:'Chowmein',price:180,type:'Food',photo:'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=500&q=80'},
+{id:3,name:'Fried Rice',price:200,type:'Food',photo:'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=500&q=80'},
+{id:4,name:'Burger',price:220,type:'Food',photo:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80'},
+{id:5,name:'Masala Tea',price:40,type:'Drinks',photo:'https://images.unsplash.com/photo-1571934811356-5cc061b6821f?auto=format&fit=crop&w=500&q=80'},
+{id:6,name:'Coffee',price:100,type:'Drinks',photo:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=500&q=80'},
+{id:7,name:'Cold Drink',price:80,type:'Drinks',photo:'https://images.unsplash.com/photo-1513558161293-cdaf765edfd7?auto=format&fit=crop&w=500&q=80'},
+{id:8,name:'Water',price:30,type:'Drinks',photo:'https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&w=500&q=80'}
 ];
-const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
-let products=load("yhy_products",initialMenu);
-let orders=load("yhy_orders",{});
-let sales=load("yhy_sales",[]);
-let table="A1",mode="dine",isAdmin=false;
-const money=n=>"Rs. "+Number(n).toLocaleString("en-IN",{maximumFractionDigits:2});
-function save(){
- localStorage.setItem("yhy_products",JSON.stringify(products));
- localStorage.setItem("yhy_orders",JSON.stringify(orders));
- localStorage.setItem("yhy_sales",JSON.stringify(sales));
-}
-function key(){return mode==="takeaway"?"Takeaway":table}
-function current(){return orders[key()]||(orders[key()]={})}
-function showPage(id){
- ["pos","reports","adminPage"].forEach(x=>document.getElementById(x).classList.add("hidden"));
- document.getElementById(id).classList.remove("hidden");
- if(id==="reports")renderReports();
- if(id==="adminPage"){if(!isAdmin){alert("Please login to Admin first.");showPage("pos");return}renderProducts()}
-}
-function renderTables(){
- document.getElementById("tables").innerHTML=Array.from({length:12},(_,i)=>{
-  let t="A"+(i+1),occupied=Object.values(orders).some(o=>o._table===t&&Object.values(o).some(v=>v&&v.qty));
-  return `<button class="${table===t&&mode==='dine'?'selected':''}" onclick="setTable('${t}')">${t}${occupied?' •':''}</button>`
- }).join("");
-}
-function setTable(t){mode="dine";table=t;update()}
-function setMode(m){mode=m;update()}
-function update(){
- document.getElementById("modeLabel").textContent=mode==="dine"?"Dine-in":"Takeaway";
- document.getElementById("orderTitle").textContent=key();
- renderTables();renderMenu();renderCart();save();
-}
-function renderMenu(){
- let q=document.getElementById("search").value.toLowerCase();
- let cat=document.getElementById("category").value;
- document.getElementById("menu").innerHTML=products.filter(p=>(cat==="All"||p.type===cat)&&p.name.toLowerCase().includes(q)).map(p=>
- `<button onclick="addItem(${p.id})"><b>${p.name}</b><br>${money(p.price)}<br><span class="small">${p.type}</span></button>`
- ).join("");
-}
-function addItem(id){
- let p=products.find(x=>x.id===id);if(!p)return;
- let o=current();if(!o[id])o[id]={name:p.name,price:Number(p.price),qty:0};
- o[id].qty++;update();
-}
-function changeQty(id,delta){
- let o=current();if(!o[id])return;o[id].qty+=delta;
- if(o[id].qty<=0)delete o[id];update();
-}
-function calc(){
- let o=current(),subtotal=Object.values(o).filter(x=>x&&x.qty).reduce((s,x)=>s+x.price*x.qty,0);
- let rate=Math.max(0,Math.min(100,Number(document.getElementById("tax").value)||0));
- return {subtotal,tax:subtotal*rate/100,total:subtotal*(1+rate/100)};
-}
-function renderCart(){
- let o=current();
- document.getElementById("cart").innerHTML=Object.entries(o).filter(([id,x])=>x&&x.qty).map(([id,x])=>
- `<div class="item"><div>${x.name}<br><span class="small">${money(x.price)} × ${x.qty}</span></div><div class="row"><button onclick="changeQty('${id}',-1)">−</button><b>${x.qty}</b><button onclick="changeQty('${id}',1)">+</button></div></div>`
- ).join("")||"<p>No items yet.</p>";
- let c=calc();document.getElementById("subtotal").textContent=money(c.subtotal);
- document.getElementById("total").textContent=money(c.total);
-}
-function clearOrder(){
- if(confirm("Clear this order?")){delete orders[key()];update()}
-}
-function checkout(){
- let o=current(),items=Object.values(o).filter(x=>x&&x.qty);
- if(!items.length){alert("Add an item first.");return}
- let c=calc();
- let receipt={date:new Date().toISOString(),place:key(),mode,payment:document.getElementById("payment").value,items:items.map(x=>({...x})),subtotal:c.subtotal,tax:c.tax,total:c.total};
- if(!confirm("Complete sale for "+money(c.total)+"?"))return;
- sales.push(receipt);delete orders[key()];save();update();renderReports();printReceipt(receipt);
-}
-function printReceipt(r){
- let w=window.open("","_blank","width=360,height=600");
- if(!w){alert("Receipt print खोल्न browser pop-up अनुमति दिनुहोस्।");return}
- w.document.write(`<html><head><title>Yamay Receipt</title><style>body{font:14px monospace;padding:15px}h2{text-align:center}hr{border:0;border-top:1px dashed}</style></head><body><h2>Yamay Hub POS</h2><p>${r.place} · ${r.mode}<br>${new Date(r.date).toLocaleString()}<br>Payment: ${r.payment}</p><hr>${r.items.map(x=>`<p>${x.name} × ${x.qty}<br>${money(x.price*x.qty)}</p>`).join("")}<hr><p>Subtotal: ${money(r.subtotal)}<br>Tax: ${money(r.tax)}<br><b>Total: ${money(r.total)}</b></p><hr><p>Thank you!</p><script>window.onload=()=>window.print()<\/script></body></html>`);
- w.document.close();
-}
-function renderReports(){
- let today=new Date().toDateString(),day=sales.filter(s=>new Date(s.date).toDateString()===today);
- document.getElementById("dailyTotal").textContent=money(day.reduce((a,s)=>a+s.total,0));
- document.getElementById("dailyCount").textContent=day.length;
- document.getElementById("salesList").innerHTML=day.slice().reverse().map(s=>`<div class="item"><span>${new Date(s.date).toLocaleTimeString()} · ${s.place} · ${s.payment}</span><b>${money(s.total)}</b></div>`).join("")||"आजको बिक्री छैन।";
-}
-function admin(){
- if(isAdmin){showPage("adminPage");return}
- let pin=prompt("Admin PIN (first setup default: 1234)");
- if(pin==="1234"){isAdmin=true;showPage("adminPage")}
- else if(pin!==null)alert("Incorrect PIN");
-}
-function logoutAdmin(){isAdmin=false;showPage("pos")}
-function addProduct(){
- let name=document.getElementById("pname").value.trim(),price=Number(document.getElementById("pprice").value),type=document.getElementById("ptype").value;
- if(!name||!Number.isFinite(price)||price<0){alert("Enter a valid name and price.");return}
- products.push({id:Date.now(),name,price,type});save();
- document.getElementById("pname").value="";document.getElementById("pprice").value="";
- renderProducts();renderMenu();
-}
-function renderProducts(){
- document.getElementById("productList").innerHTML=products.map(p=>`<div class="item"><span>${p.name} · ${money(p.price)} (${p.type})</span><button class="danger" onclick="removeProduct(${p.id})">Delete</button></div>`).join("");
-}
-function removeProduct(id){
- if(confirm("Delete this product?")){products=products.filter(p=>p.id!==id);save();renderProducts();renderMenu()}
-}
-function backup(){
- let data=JSON.stringify({products,orders,sales},null,2),a=document.createElement("a");
- a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download="yamay-pos-backup.json";a.click();URL.revokeObjectURL(a.href);
-}
-function restore(e){
- let f=e.target.files[0];if(!f)return;
- let r=new FileReader();
- r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.products)||!Array.isArray(d.sales)||typeof d.orders!=="object")throw Error();if(!confirm("Replace current local data with this backup?"))return;products=d.products;orders=d.orders;sales=d.sales;save();update();alert("Backup restored.");}catch{alert("Invalid backup file.")}};
- r.readAsText(f);e.target.value="";
-}
-function toggleTheme(){document.body.classList.toggle("dark");localStorage.setItem("yhy_dark",document.body.classList.contains("dark"))}
-function toggleLang(){alert("Language switching will be added in a later version.")}
-if(localStorage.getItem("yhy_dark")==="true")document.body.classList.add("dark");
-update();
+function load(k,f){try{const v=JSON.parse(localStorage.getItem('yhy_'+k));return v===null?f:v}catch{return f}}
+let products=load('products',defaultProducts),orders=load('orders',{}),sales=load('sales',[]),user=null,currentKey=null;
+function persist(){try{localStorage.setItem('yhy_products',JSON.stringify(products));localStorage.setItem('yhy_orders',JSON.stringify(orders));localStorage.setItem('yhy_sales',JSON.stringify(sales))}catch(e){alert('Could not save data. Device storage may be full. Export a backup.');}}
+function login(ev){ev.preventDefault();let u=document.getElementById('username').value.trim(),p=document.getElementById('password').value,r=document.getElementById('role').value;let ok=(r==='admin'&&u==='admin'&&p==='1234')||(r==='employee'&&u==='employee'&&p==='1111');if(!ok){alert('Login details did not match. Demo: admin/1234 or employee/1111');return}user={name:u,role:r};document.getElementById('loginScreen').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('who').textContent=r==='admin'?'Admin':'Employee';document.getElementById('navProducts').classList.toggle('hidden',r!=='admin');showView('tables');renderTables()}
+document.getElementById('loginForm').addEventListener('submit',login);
+function logout(){user=null;currentKey=null;document.getElementById('app').classList.add('hidden');document.getElementById('loginScreen').classList.remove('hidden');document.getElementById('password').value=''}
+function showView(v){['tables','order','products','reports'].forEach(x=>document.getElementById(x+'View').classList.toggle('hidden',x!==v));if(v==='tables'){currentKey=null;renderTables()}if(v==='order'){renderMenu();renderCart()}if(v==='products')renderAdminProducts();if(v==='reports')renderReports()}
+function orderFor(k){if(!orders[k])orders[k]={items:{},mode:k==='Takeaway'?'Takeaway':'Dine-in',table:k};return orders[k]}
+function renderTables(){let el=document.getElementById('tables');el.innerHTML=Array.from({length:12},(_,i)=>{let t='A'+(i+1),o=orders[t],busy=o&&Object.keys(o.items||{}).length;return `<button class="table-btn ${busy?'busy':''}" onclick="openOrder('${t}')"><strong>▤ ${t}</strong><small>${busy?'Order in progress':'Available'}</small></button>`}).join('')}
+function openOrder(k){currentKey=k;orderFor(k);document.getElementById('orderHeading').textContent=k==='Takeaway'?'Takeaway':'Table: '+k;document.getElementById('orderStatus').textContent=Object.keys(orderFor(k).items).length?'Order in progress':'New order';showView('order')}
+function startTakeaway(){openOrder('Takeaway')}
+function renderMenu(){let q=(document.getElementById('searchMenu').value||'').toLowerCase(),cat=document.getElementById('catFilter').value;document.getElementById('menu').innerHTML=products.filter(p=>(cat==='All'||p.type===cat)&&p.name.toLowerCase().includes(q)).map(p=>`<div class="product"><img src="${esc(p.photo||'')}" alt="${esc(p.name)}" onerror="this.style.visibility='hidden';this.style.height='20px'"><div class="pbody"><div class="pname">${esc(p.name)}</div><div class="price">${money(p.price)}</div><button onclick="addItem(${p.id})">＋ Add</button></div></div>`).join('')||'<p>No products found.</p>'}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function addItem(id){let p=products.find(x=>x.id===id);if(!p)return;let o=orderFor(currentKey);if(!o.items[id])o.items[id]={id:p.id,name:p.name,price:Number(p.price),qty:0};o.items[id].qty++;persist();renderCart()}
+function changeQty(id,d){let o=orderFor(currentKey);if(!o.items[id])return;o.items[id].qty+=d;if(o.items[id].qty<=0)delete o.items[id];persist();renderCart()}
+function totals(){let o=orderFor(currentKey),items=Object.values(o.items),sub=items.reduce((s,x)=>s+x.price*x.qty,0),discount=Math.max(0,Math.min(sub,Number(document.getElementById('discount').value)||0)),taxRate=Math.max(0,Math.min(100,Number(document.getElementById('tax').value)||0)),tax=(sub-discount)*taxRate/100;return{sub,discount,tax,total:sub-discount+tax,items}}
+function renderCart(){if(!currentKey)return;let o=orderFor(currentKey);document.getElementById('cart').innerHTML=Object.values(o.items).map(x=>`<div class="orderline"><div><b>${esc(x.name)}</b><div class="muted">${money(x.price)} each</div></div><div class="qty"><button class="secondary" onclick="changeQty(${x.id},-1)">−</button><b>${x.qty}</b><button onclick="changeQty(${x.id},1)">＋</button></div><div>${money(x.price*x.qty)}</div></div>`).join('')||'<p class="muted">No items yet. Add from the menu.</p>';let t=totals();document.getElementById('subtotal').textContent=money(t.sub);document.getElementById('total').textContent=money(t.total);document.getElementById('orderStatus').textContent=t.items.length?'Order in progress':'New order';persist()}
+function clearOrder(){if(!currentKey)return;if(confirm('Clear this order?')){orders[currentKey]={items:{},mode:currentKey==='Takeaway'?'Takeaway':'Dine-in',table:currentKey};persist();renderCart()}}
+function checkout(){if(!currentKey)return;let t=totals();if(!t.items.length){alert('Add at least one item before checkout.');return}let r={bill:'YH-'+Date.now().toString().slice(-8),date:new Date().toISOString(),place:currentKey,mode:currentKey==='Takeaway'?'Takeaway':'Dine-in',payment:document.getElementById('payment').value,items:t.items.map(x=>({...x})),subtotal:t.sub,discount:t.discount,tax:t.tax,total:t.total,employee:user?.name||'unknown'};sales.push(r);delete orders[currentKey];persist();renderTables();let ok=printReceipt(r);document.getElementById('checkoutMessage').textContent=ok?'Sale saved. Print dialog opened; printing must be confirmed in the system dialog.':'Sale saved, but the print window was blocked or unavailable. Receipt can be reprinted from Daily Closing.';alert(ok?'Sale recorded. Check the print dialog.':'Sale recorded, but receipt printing could not open. You can reprint it from Daily Closing.');showView('tables')}
+function receiptHTML(r){return `<!doctype html><html><head><meta charset="utf-8"><title>Receipt ${esc(r.bill)}</title><style>body{font:14px monospace;max-width:300px;margin:10px auto;padding:10px}h2,p{text-align:center}.line{border-top:1px dashed #555;padding-top:8px}.flex{display:flex;justify-content:space-between;gap:8px;margin:6px 0}@media print{button{display:none}}</style></head><body><h2>Yamay Hub</h2><p>Good Food · Great Vibes<br>${esc(r.place)} · ${esc(r.mode)}<br>${new Date(r.date).toLocaleString()}<br>Bill: ${esc(r.bill)}</p><div class="line">${r.items.map(x=>`<div class="flex"><span>${esc(x.name)} × ${x.qty}</span><span>${money(x.price*x.qty)}</span></div>`).join('')}<div class="flex"><span>Subtotal</span><span>${money(r.subtotal)}</span></div><div class="flex"><span>Discount</span><span>-${money(r.discount)}</span></div><div class="flex"><span>Tax</span><span>${money(r.tax)}</span></div><div class="flex"><b>TOTAL</b><b>${money(r.total)}</b></div><div class="flex"><span>Payment</span><span>${esc(r.payment)}</span></div></div><p>Thank you!</p><script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`}
+function printReceipt(r){try{let w=window.open('','_blank','width=380,height=650');if(!w)return false;w.document.open();w.document.write(receiptHTML(r));w.document.close();return true}catch(e){return false}}
+function renderAdminProducts(){if(user?.role!=='admin')return;document.getElementById('productAdminList').innerHTML='<div class="tablewrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Action</th></tr></thead><tbody>'+products.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.type)}</td><td><input aria-label="Price" type="number" min="0" step=".01" value="${p.price}" id="price-${p.id}" style="width:100px"></td><td><button onclick="savePrice(${p.id})">Save price</button> <button class="danger" onclick="deleteProduct(${p.id})">Delete</button></td></tr>`).join('')+'</tbody></table></div>'}
+document.getElementById('productForm').addEventListener('submit',e=>{e.preventDefault();if(user?.role!=='admin'){alert('Admin only');return}let name=document.getElementById('productName').value.trim(),price=Number(document.getElementById('productPrice').value),type=document.getElementById('productType').value,photo=document.getElementById('productPhoto').value.trim();if(!name||!Number.isFinite(price)||price<0){alert('Enter a valid product name and price.');return}products.push({id:Date.now(),name,price,type,photo});persist();e.target.reset();renderAdminProducts();alert('Product added.')});
+function savePrice(id){if(user?.role!=='admin')return;let p=products.find(x=>x.id===id),v=Number(document.getElementById('price-'+id).value);if(!p||!Number.isFinite(v)||v<0){alert('Invalid price');return}p.price=v;persist();renderAdminProducts();alert('Price saved.');}
+function deleteProduct(id){if(user?.role!=='admin')return;if(!confirm('Delete this product?'))return;products=products.filter(p=>p.id!==id);persist();renderAdminProducts()}
+function renderReports(){let today=new Date().toDateString(),day=sales.filter(s=>new Date(s.date).toDateString()===today),sum=day.reduce((a,s)=>a+s.total,0),qty=day.reduce((a,s)=>a+s.items.reduce((b,x)=>b+x.qty,0),0),cash=day.filter(s=>s.payment==='Cash').reduce((a,s)=>a+s.total,0),card=day.filter(s=>s.payment==='Card').reduce((a,s)=>a+s.total,0);document.getElementById('statSales').textContent=money(sum);document.getElementById('statOrders').textContent=day.length;document.getElementById('statItems').textContent=qty;document.getElementById('statPayments').textContent=money(cash)+' / '+money(card);let agg={};day.forEach(s=>s.items.forEach(x=>{if(!agg[x.name])agg[x.name]={qty:0,sales:0};agg[x.name].qty+=x.qty;agg[x.name].sales+=x.qty*x.price}));document.getElementById('itemSales').innerHTML=Object.entries(agg).sort((a,b)=>b[1].qty-a[1].qty).map(([n,v])=>`<tr><td>${esc(n)}</td><td>${v.qty}</td><td>${money(v.sales)}</td></tr>`).join('')||'<tr><td colspan="3">No sales today.</td></tr>';document.getElementById('transactions').innerHTML=day.slice().reverse().map(s=>`<tr><td>${esc(s.bill)}</td><td>${new Date(s.date).toLocaleTimeString()}</td><td>${esc(s.place)}</td><td>${s.items.reduce((a,x)=>a+x.qty,0)}</td><td>${money(s.total)}</td><td>${esc(s.payment)}</td><td><button onclick="reprint('${s.bill}')">Print</button></td></tr>`).join('')||'<tr><td colspan="7">No transactions today.</td></tr>'}
+function reprint(b){let r=sales.find(s=>s.bill===b);if(r&&!printReceipt(r))alert('Print window blocked. Allow pop-ups in browser and retry.')}
+function backupData(){let blob=new Blob([JSON.stringify({products,orders,sales},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='yamay-hub-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function exportSales(){let today=new Date().toDateString(),day=sales.filter(s=>new Date(s.date).toDateString()===today),rows=[['Bill','Date','Place','Payment','Item','Qty','Unit Price','Line Total','Bill Total'],...day.flatMap(s=>s.items.map(x=>[s.bill,s.date,s.place,s.payment,x.name,x.qty,x.price,x.qty*x.price,s.total]))],csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='yamay-daily-sales.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 </script>
 </body>
-</html>
+</html>'''
+path = Path("/mnt/data/yamay_hub_pos_v1.html")
+path.write_text(html, encoding="utf-8")
+print(f"Created {path} ({len(html):,} characters)")
