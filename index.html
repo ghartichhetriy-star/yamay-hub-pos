@@ -1,38 +1,255 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ne">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Yamay Hub POS</title>
 <style>
-body{margin:0;background:#111;color:white;font-family:Arial;padding:16px}
-header{background:#222;padding:18px;border-radius:14px;border-bottom:3px solid #f4d21f}
-h1{color:#f4d21f;margin:0}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:16px 0}
-button{padding:15px;border:0;border-radius:10px;font-size:16px;cursor:pointer}
-.table,.food{background:#292929;color:white;border:1px solid #444}
-.food{display:flex;flex-direction:column;gap:10px;align-items:center}
-.price{color:#f4d21f;font-weight:bold}
-.yellow{background:#f4d21f;color:#111;font-weight:bold}
-.panel{background:#222;border-radius:12px;padding:14px;margin-top:15px}
-#order{display:none}
-select{padding:12px;width:100%;margin:8px 0;border-radius:8px}
+:root{--bg:#f3f5f8;--card:#fff;--fg:#172033;--accent:#087f5b;--line:#dce2ea}
+body.dark{--bg:#151922;--card:#222936;--fg:#f4f6fa;--line:#3b4555}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px Arial,sans-serif}
+header{background:#087f5b;color:white;padding:16px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+h1{font-size:21px;margin:0} h2{font-size:17px}
+main{padding:12px;max-width:1100px;margin:auto}
+nav,.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,select,input{padding:11px;border-radius:8px;border:1px solid var(--line);font-size:14px}
+button{cursor:pointer;background:var(--accent);color:white;border:0}
+button.secondary{background:#64748b}
+button.danger{background:#b42318}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px;margin:10px 0}
+.layout{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:750px){.layout{grid-template-columns:1.1fr .9fr}}
+.tables,.menu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tables button{background:#64748b;min-height:55px}
+.tables button.selected{background:#087f5b;outline:3px solid #91e4c4}
+.menu button{background:var(--card);color:var(--fg);border:1px solid var(--line);text-align:left;min-height:65px}
+.small{font-size:12px;opacity:.8}
+.item{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding:10px 0}
+.item button{padding:7px 11px}
+.total{font-size:23px;font-weight:bold}
+input,select{background:var(--card);color:var(--fg);max-width:100%}
+.hidden{display:none!important}
+footer{text-align:center;padding:20px;font-size:12px;opacity:.7}
 </style>
 </head>
 <body>
-<header><h1>Yamay Hub POS</h1><p>GOOD FOOD · GREAT VIBES</p></header>
-<section id="home"><h2>Select Table</h2><div class="grid" id="tables"></div><button class="yellow" onclick="openOrder('Takeaway')">Takeaway Order</button></section>
-<section id="order"><button class="table" onclick="back()">← Back</button><h2 id="heading"></h2><label>Order type</label><select id="kind"><option>Dine-in</option><option>Takeaway</option></select><h3>Food & Drinks</h3><div class="grid" id="foods"></div><div class="panel"><h3>Bill</h3><div id="bill">No items selected</div><h2 id="total">Total: रु. 0</h2><label>Payment</label><select id="pay"><option>Cash</option><option>Card</option></select><button class="yellow" onclick="checkout()">Checkout / Print Bill</button></div></section>
+<header>
+  <div><h1>🍽️ Yamay Hub POS</h1><div class="small">Cafe Billing System</div></div>
+  <div class="row">
+    <button class="secondary" onclick="toggleTheme()">☼</button>
+    <button class="secondary" onclick="toggleLang()" id="langBtn">नेपाली</button>
+  </div>
+</header>
+<main>
+  <nav>
+    <button onclick="showPage('pos')">POS / Billing</button>
+    <button onclick="showPage('reports')">Sales Report</button>
+    <button onclick="admin()">Admin</button>
+    <button class="secondary" onclick="backup()">Backup</button>
+    <button class="secondary" onclick="document.getElementById('restoreFile').click()">Restore</button>
+    <input id="restoreFile" type="file" accept=".json" class="hidden" onchange="restore(event)">
+  </nav>
+
+  <section id="pos">
+    <div class="layout">
+      <div>
+        <div class="card">
+          <h2>१. टेबल छान्नुहोस्</h2>
+          <div class="tables" id="tables"></div>
+          <p class="small">Takeaway छान्दा टेबल आवश्यक पर्दैन।</p>
+          <div class="row">
+            <button class="secondary" onclick="setMode('dine')">Dine-in</button>
+            <button class="secondary" onclick="setMode('takeaway')">Takeaway</button>
+            <span id="modeLabel">Dine-in</span>
+          </div>
+        </div>
+        <div class="card">
+          <h2>२. Menu</h2>
+          <div class="row">
+            <input id="search" placeholder="खाना खोज्नुहोस्..." oninput="renderMenu()">
+            <select id="category" onchange="renderMenu()">
+              <option value="All">सबै / All</option>
+              <option>Food</option><option>Drinks</option>
+            </select>
+          </div>
+          <div class="menu" id="menu"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>३. बिल / Order</h2>
+        <div id="orderTitle">Table A1</div>
+        <div id="cart"></div>
+        <div class="item"><span>Subtotal</span><b id="subtotal">Rs. 0</b></div>
+        <div class="item"><span>Tax (%)</span><input id="tax" type="number" min="0" max="100" value="0" style="width:85px" onchange="renderCart()"></div>
+        <div class="item"><span>Total</span><span class="total" id="total">Rs. 0</span></div>
+        <p>Payment method</p>
+        <select id="payment">
+          <option>Cash</option><option>Card</option>
+        </select>
+        <div class="row" style="margin-top:12px">
+          <button onclick="checkout()">Complete Sale</button>
+          <button class="danger" onclick="clearOrder()">Clear Order</button>
+        </div>
+        <p class="small">Card विकल्पले मात्र payment charge गर्दैन। वास्तविक card terminal छुट्टै चाहिन्छ।</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="reports" class="hidden">
+    <div class="card">
+      <h2>Daily Sales Report</h2>
+      <p>आजको बिक्री: <b id="dailyTotal">Rs. 0</b></p>
+      <p>बिल संख्या: <b id="dailyCount">0</b></p>
+      <div id="salesList"></div>
+    </div>
+  </section>
+  <section id="adminPage" class="hidden">
+    <div class="card">
+      <h2>Admin — Product Management</h2>
+      <p class="small">यहाँका परिवर्तन यसै device को browser मा मात्र सुरक्षित हुन्छन्।</p>
+      <div class="row">
+        <input id="pname" placeholder="Product name">
+        <input id="pprice" type="number" min="0" placeholder="Price (Rs.)">
+        <select id="ptype"><option>Food</option><option>Drinks</option></select>
+        <button onclick="addProduct()">Add Product</button>
+      </div>
+      <div id="productList"></div>
+      <button class="secondary" onclick="logoutAdmin()">Exit Admin</button>
+    </div>
+  </section>
+</main>
+<footer>Yamay Hub POS · Local prototype · Keep regular backups</footer>
 <script>
-const menu=[['Momo',180,'🥟'],['Chowmein',220,'🍜'],['Burger',250,'🍔'],['Popcorn Chicken',200,'🍗'],['Lemon Tea',80,'🍋'],['Cold Drink',100,'🥤']];
-let cart={},table='A1';
-function init(){document.getElementById('tables').innerHTML=Array.from({length:12},(_,i)=>'<button class="table" onclick="openOrder(\'A'+(i+1)+'\')">Table A'+(i+1)+'</button>').join('')}
-function openOrder(t){table=t;cart={};document.getElementById('home').style.display='none';document.getElementById('order').style.display='block';document.getElementById('heading').textContent=t==='Takeaway'?'Takeaway Order':'Table '+t;document.getElementById('kind').value=t==='Takeaway'?'Takeaway':'Dine-in';draw()}
-function back(){document.getElementById('home').style.display='block';document.getElementById('order').style.display='none'}
-function draw(){document.getElementById('foods').innerHTML=menu.map((p,i)=>'<div class="food"><span style="font-size:28px">'+p[2]+'</span><b>'+p[0]+'</b><span class="price">रु. '+p[1]+'</span><div><button onclick="change('+i+',-1)">−</button> '+(cart[i]||0)+' <button onclick="change('+i+',1)">+</button></div></div>').join('');let total=0,html='';menu.forEach((p,i)=>{if(cart[i]){html+='<p>'+p[0]+' × '+cart[i]+' = रु. '+p[1]*cart[i]+'</p>';total+=p[1]*cart[i]}});document.getElementById('bill').innerHTML=html||'No items selected';document.getElementById('total').textContent='Total: रु. '+total}
-function change(i,n){cart[i]=Math.max(0,(cart[i]||0)+n);draw()}
-function checkout(){let total=menu.reduce((s,p,i)=>s+p[1]*(cart[i]||0),0);if(!total){alert('पहिले खाना छान्नुहोस्');return}let receipt='YAMAY HUB POS\n'+table+'\n'+menu.map((p,i)=>cart[i]?p[0]+' x '+cart[i]+' = रु. '+p[1]*cart[i]:'').filter(Boolean).join('\n')+'\nTotal: रु. '+total+'\nPayment: '+document.getElementById('pay').value;let w=window.open('','_blank');if(w){w.document.write('<pre>'+receipt+'</pre>');w.document.close();w.print()}else alert(receipt)}
-init();
+const initialMenu=[
+ {id:1,name:"Momo",price:150,type:"Food"},
+ {id:2,name:"Chowmein",price:180,type:"Food"},
+ {id:3,name:"Fried Rice",price:200,type:"Food"},
+ {id:4,name:"Burger",price:220,type:"Food"},
+ {id:5,name:"Tea",price:40,type:"Drinks"},
+ {id:6,name:"Coffee",price:100,type:"Drinks"},
+ {id:7,name:"Water",price:30,type:"Drinks"},
+ {id:8,name:"Cold Drink",price:80,type:"Drinks"}
+];
+const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
+let products=load("yhy_products",initialMenu);
+let orders=load("yhy_orders",{});
+let sales=load("yhy_sales",[]);
+let table="A1",mode="dine",isAdmin=false;
+const money=n=>"Rs. "+Number(n).toLocaleString("en-IN",{maximumFractionDigits:2});
+function save(){
+ localStorage.setItem("yhy_products",JSON.stringify(products));
+ localStorage.setItem("yhy_orders",JSON.stringify(orders));
+ localStorage.setItem("yhy_sales",JSON.stringify(sales));
+}
+function key(){return mode==="takeaway"?"Takeaway":table}
+function current(){return orders[key()]||(orders[key()]={})}
+function showPage(id){
+ ["pos","reports","adminPage"].forEach(x=>document.getElementById(x).classList.add("hidden"));
+ document.getElementById(id).classList.remove("hidden");
+ if(id==="reports")renderReports();
+ if(id==="adminPage"){if(!isAdmin){alert("Please login to Admin first.");showPage("pos");return}renderProducts()}
+}
+function renderTables(){
+ document.getElementById("tables").innerHTML=Array.from({length:12},(_,i)=>{
+  let t="A"+(i+1),occupied=Object.values(orders).some(o=>o._table===t&&Object.values(o).some(v=>v&&v.qty));
+  return `<button class="${table===t&&mode==='dine'?'selected':''}" onclick="setTable('${t}')">${t}${occupied?' •':''}</button>`
+ }).join("");
+}
+function setTable(t){mode="dine";table=t;update()}
+function setMode(m){mode=m;update()}
+function update(){
+ document.getElementById("modeLabel").textContent=mode==="dine"?"Dine-in":"Takeaway";
+ document.getElementById("orderTitle").textContent=key();
+ renderTables();renderMenu();renderCart();save();
+}
+function renderMenu(){
+ let q=document.getElementById("search").value.toLowerCase();
+ let cat=document.getElementById("category").value;
+ document.getElementById("menu").innerHTML=products.filter(p=>(cat==="All"||p.type===cat)&&p.name.toLowerCase().includes(q)).map(p=>
+ `<button onclick="addItem(${p.id})"><b>${p.name}</b><br>${money(p.price)}<br><span class="small">${p.type}</span></button>`
+ ).join("");
+}
+function addItem(id){
+ let p=products.find(x=>x.id===id);if(!p)return;
+ let o=current();if(!o[id])o[id]={name:p.name,price:Number(p.price),qty:0};
+ o[id].qty++;update();
+}
+function changeQty(id,delta){
+ let o=current();if(!o[id])return;o[id].qty+=delta;
+ if(o[id].qty<=0)delete o[id];update();
+}
+function calc(){
+ let o=current(),subtotal=Object.values(o).filter(x=>x&&x.qty).reduce((s,x)=>s+x.price*x.qty,0);
+ let rate=Math.max(0,Math.min(100,Number(document.getElementById("tax").value)||0));
+ return {subtotal,tax:subtotal*rate/100,total:subtotal*(1+rate/100)};
+}
+function renderCart(){
+ let o=current();
+ document.getElementById("cart").innerHTML=Object.entries(o).filter(([id,x])=>x&&x.qty).map(([id,x])=>
+ `<div class="item"><div>${x.name}<br><span class="small">${money(x.price)} × ${x.qty}</span></div><div class="row"><button onclick="changeQty('${id}',-1)">−</button><b>${x.qty}</b><button onclick="changeQty('${id}',1)">+</button></div></div>`
+ ).join("")||"<p>No items yet.</p>";
+ let c=calc();document.getElementById("subtotal").textContent=money(c.subtotal);
+ document.getElementById("total").textContent=money(c.total);
+}
+function clearOrder(){
+ if(confirm("Clear this order?")){delete orders[key()];update()}
+}
+function checkout(){
+ let o=current(),items=Object.values(o).filter(x=>x&&x.qty);
+ if(!items.length){alert("Add an item first.");return}
+ let c=calc();
+ let receipt={date:new Date().toISOString(),place:key(),mode,payment:document.getElementById("payment").value,items:items.map(x=>({...x})),subtotal:c.subtotal,tax:c.tax,total:c.total};
+ if(!confirm("Complete sale for "+money(c.total)+"?"))return;
+ sales.push(receipt);delete orders[key()];save();update();renderReports();printReceipt(receipt);
+}
+function printReceipt(r){
+ let w=window.open("","_blank","width=360,height=600");
+ if(!w){alert("Receipt print खोल्न browser pop-up अनुमति दिनुहोस्।");return}
+ w.document.write(`<html><head><title>Yamay Receipt</title><style>body{font:14px monospace;padding:15px}h2{text-align:center}hr{border:0;border-top:1px dashed}</style></head><body><h2>Yamay Hub POS</h2><p>${r.place} · ${r.mode}<br>${new Date(r.date).toLocaleString()}<br>Payment: ${r.payment}</p><hr>${r.items.map(x=>`<p>${x.name} × ${x.qty}<br>${money(x.price*x.qty)}</p>`).join("")}<hr><p>Subtotal: ${money(r.subtotal)}<br>Tax: ${money(r.tax)}<br><b>Total: ${money(r.total)}</b></p><hr><p>Thank you!</p><script>window.onload=()=>window.print()<\/script></body></html>`);
+ w.document.close();
+}
+function renderReports(){
+ let today=new Date().toDateString(),day=sales.filter(s=>new Date(s.date).toDateString()===today);
+ document.getElementById("dailyTotal").textContent=money(day.reduce((a,s)=>a+s.total,0));
+ document.getElementById("dailyCount").textContent=day.length;
+ document.getElementById("salesList").innerHTML=day.slice().reverse().map(s=>`<div class="item"><span>${new Date(s.date).toLocaleTimeString()} · ${s.place} · ${s.payment}</span><b>${money(s.total)}</b></div>`).join("")||"आजको बिक्री छैन।";
+}
+function admin(){
+ if(isAdmin){showPage("adminPage");return}
+ let pin=prompt("Admin PIN (first setup default: 1234)");
+ if(pin==="1234"){isAdmin=true;showPage("adminPage")}
+ else if(pin!==null)alert("Incorrect PIN");
+}
+function logoutAdmin(){isAdmin=false;showPage("pos")}
+function addProduct(){
+ let name=document.getElementById("pname").value.trim(),price=Number(document.getElementById("pprice").value),type=document.getElementById("ptype").value;
+ if(!name||!Number.isFinite(price)||price<0){alert("Enter a valid name and price.");return}
+ products.push({id:Date.now(),name,price,type});save();
+ document.getElementById("pname").value="";document.getElementById("pprice").value="";
+ renderProducts();renderMenu();
+}
+function renderProducts(){
+ document.getElementById("productList").innerHTML=products.map(p=>`<div class="item"><span>${p.name} · ${money(p.price)} (${p.type})</span><button class="danger" onclick="removeProduct(${p.id})">Delete</button></div>`).join("");
+}
+function removeProduct(id){
+ if(confirm("Delete this product?")){products=products.filter(p=>p.id!==id);save();renderProducts();renderMenu()}
+}
+function backup(){
+ let data=JSON.stringify({products,orders,sales},null,2),a=document.createElement("a");
+ a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download="yamay-pos-backup.json";a.click();URL.revokeObjectURL(a.href);
+}
+function restore(e){
+ let f=e.target.files[0];if(!f)return;
+ let r=new FileReader();
+ r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.products)||!Array.isArray(d.sales)||typeof d.orders!=="object")throw Error();if(!confirm("Replace current local data with this backup?"))return;products=d.products;orders=d.orders;sales=d.sales;save();update();alert("Backup restored.");}catch{alert("Invalid backup file.")}};
+ r.readAsText(f);e.target.value="";
+}
+function toggleTheme(){document.body.classList.toggle("dark");localStorage.setItem("yhy_dark",document.body.classList.contains("dark"))}
+function toggleLang(){alert("Language switching will be added in a later version.")}
+if(localStorage.getItem("yhy_dark")==="true")document.body.classList.add("dark");
+update();
 </script>
 </body>
 </html>
